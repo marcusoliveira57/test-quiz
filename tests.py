@@ -127,3 +127,40 @@ def test_correct_selected_choices_exceeds_max():
     with pytest.raises(Exception, match='Cannot select more than 1 choices'):
         question.correct_selected_choices([1, 2])
 
+
+@pytest.fixture
+def populated_question():
+    """
+    Fixture que cria uma questão completa com 3 alternativas.
+    Esta questão será injetada automaticamente nos testes que pedirem por ela.
+    """
+    question = Question(title='Qual a capital da França?', points=10, max_selections=1)
+    question.add_choice('Londres', is_correct=False) # ID 1
+    question.add_choice('Paris', is_correct=True)    # ID 2
+    question.add_choice('Berlim', is_correct=False)  # ID 3
+    return question
+
+
+def test_fixture_choices_length(populated_question):
+    """Testa se a fixture montou a questão com a quantidade certa de escolhas."""
+    # Repare que 'populated_question' já vem instanciado e preenchido!
+    assert len(populated_question.choices) == 3
+    assert populated_question.points == 10
+
+
+def test_fixture_correct_answer(populated_question):
+    """Testa se o sistema corrige a alternativa certa usando a fixture."""
+    # O usuário selecionou a opção 2 (Paris)
+    correct_selections = populated_question.correct_selected_choices([2])
+    
+    # A resposta correta deve ser o ID 2
+    assert correct_selections == [2]
+
+
+def test_fixture_incorrect_answer(populated_question):
+    """Testa se o sistema lida bem com uma resposta errada usando a fixture."""
+    # O usuário selecionou a opção 1 (Londres)
+    correct_selections = populated_question.correct_selected_choices([1])
+    
+    # Como ele errou, a lista de acertos deve voltar vazia
+    assert correct_selections == []
